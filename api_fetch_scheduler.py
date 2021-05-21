@@ -1,16 +1,23 @@
 import pairs_info
 import monitor_pairs
+import utils
 
 import os
 pid = os.getpid()
 op = open("api_monitor.pid","w")
-op.write("%s" % pid)
+pidstring=str(pid)
+print(pidstring)
+op.write(pidstring)
 op.close()
 
 import argparse
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('keep', default=False, type=bool, help='keep the process waiting for interrupt from user')
+
+
+parser.add_argument('--keep',
+                    default=False,
+                    help='keep the process waiting for interrupt from user')
 
 args = parser.parse_args()
 _keep  = args.keep
@@ -25,6 +32,7 @@ available_pairs_df = pairs_info["available_pairs_df"]
 
 #from apscheduler.scheduler import Scheduler
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler 
 import logging
 logging.basicConfig()
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)
@@ -53,11 +61,13 @@ def weekly_job():
 #sched.add_cron_job(job_function, month='*', day='*', hour='21',minute='14')
 
 
-scheduler = BackgroundScheduler()
-scheduler.start()
-scheduler.add_job(hourly_job, trigger='cron', minute=10,id='hourly_job')
+
+#scheduler = BackgroundScheduler()
+scheduler = BlockingScheduler()
+scheduler.add_job(hourly_job, trigger='cron', minute=46,id='hourly_job')
 scheduler.add_job(daily_job, trigger='cron', hour=4,id='daily_job')
 scheduler.add_job(weekly_job, trigger='cron', day_of_week='2',id='weekly_job')
+scheduler.start()
 print('here is the schedule')
 scheduler.print_jobs()
 

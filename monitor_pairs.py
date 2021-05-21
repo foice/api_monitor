@@ -35,9 +35,14 @@ def push_longdate(d,unit='M',to='floor'):
     if to == 'floor':
         return z
 
-def filename(_pair,_interval,_from,_to):
+def filename_old(_pair,_interval,_from,_to):
     return "pairs/"+_pair+"/"+str(_interval)+"/"+_pair+"@"+str(_from)+'@'+str(_to)+".csv"
-
+def pair_path(_pair,_interval,_from,_to):
+    return "pairs/"+_pair+"/"+str(_interval)+"/"
+def filename(_pair,_interval,_from,_to):
+    fn = pair_path(_pair,_interval,_from,_to)+_pair+"@"+str(_from)+'@'+str(_to)+".csv"
+    if fn == filename_old(_pair,_interval,_from,_to):
+        return fn
 
 def date_interval_ceil2floor_bins(_min,_max,file_resolution='1h'):
 
@@ -96,8 +101,14 @@ def pairs2csv(pairs=None,intervals=[1,15,60,1440],chunksize={1:60,15:24*60,1440:
                 bins=date_interval_ceil2floor_bins(_min,_max,file_resolution=file_resolution[_interval])
 
                 for _from, _to in bins:
-
                     _filename_=filename(_pair,_interval,_from,_to) #"pairs/"+_pair+"/"+str(_interval)+"/"+_pair+"@"+str(_from)+'@'+str(_to)+".csv"
+                    _pairpath_=pair_path(_pair,_interval,_from,_to)
+		    # check if directory exists
+                    if os.path.isdir(_pairpath_):
+                        pass
+                    else:
+                        print("making folder "+_pairpath_)
+                        os.system( "mkdir -p "+_pairpath_ )
                     # check if file exists
                     if os.path.isfile(_filename_):
                         double_logger_monitor_pairs.debug(_filename_ + " file exist")
